@@ -40,21 +40,22 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-     
+
+        const {name} = req.body
+        const participantsSchema = joi.object({
+            name: joi.string().required()
+        })
+        const nomeparticipante = await participantsSchema.validate(name)
+        if(nomeparticipante.error){return res.status(422).send('name not found')} 
 
 
         try{
-            const inforeq = req.body
-            const participantsSchema = joi.object({
-                name: joi.string().required()
-            })
-            const nomeparticipante = await participantsSchema.validate(inforeq)
-            if(nomeparticipante.error) return res.status(422).send('name not found')
-            const namexiste = await db.collection('participants').findOne(nomeparticipante)
+            
+            const namexiste = await db.collection('participants').findOne({name})
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({...nomeparticipante,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({name,lastStatus)
             await db.collection("messages").insertOne({
-                from: nomeparticipante.name,
+                from: nomeparticipante.value.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
