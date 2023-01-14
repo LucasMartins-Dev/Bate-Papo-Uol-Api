@@ -4,6 +4,7 @@ import cors from 'cors'
 import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
 
+
 dotenv.config()
 const app= express()
 app.use(cors())
@@ -15,6 +16,15 @@ await mongoClient.connect()
 
 db = mongoClient.db()
 
+const participantsSchema = Joi.object({
+    name: Joi.string().min(1).required()
+})
+
+const messagesSchema = Joi.object({
+    to: Joi.string().min(1).required(),
+    text: Joi.string().min(1).required(),
+    type: Joi.string().valid('message','private_message').required()
+})
 
 app.get('/participants',async (req,res)=>{
     try{
@@ -31,12 +41,12 @@ app.get('/participants',async (req,res)=>{
     app.post('/participants', async (req,res)=>{
      
         try{
-            const {name} = req.body
-            const namexiste = await db.collection('participants').findOne({name})
+            const nomeparticipante = participantsSchema.validateAsync(req.body) 
+            const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({name,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ ...nomeparticipante,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: name,
+                from: nomeparticipante.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
