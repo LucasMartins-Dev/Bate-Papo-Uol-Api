@@ -3,7 +3,15 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
-import {participantsSchema, messagesSchema} from '../schema/schema.js'
+import joi from 'joi'
+
+
+
+const messagesSchema = joi.object({
+    to: joi.string().required(),
+    text: joi.string().required(),
+    type: joi.string().valid('message','private_message').required()
+})
 
 
 
@@ -35,10 +43,13 @@ app.get('/participants',async (req,res)=>{
      
         try{
             const inforeq = req.body
+            const participantsSchema = joi.object({
+                name: joi.string().required()
+            })
             const nomeparticipante = await participantsSchema.validate(inforeq) 
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name:nomeparticipante,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name:nomeparticipante.name,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
                 from: nomeparticipante.name,
                 to: 'Todos',
