@@ -16,7 +16,7 @@ await mongoClient.connect()
 db = mongoClient.db()
 
 
-app.get('/participants',(req,res)=>{
+app.get('/participants',async (req,res)=>{
     try{
         const participants = await db.collection("participants").find().toArray()
             return res.send(participants)
