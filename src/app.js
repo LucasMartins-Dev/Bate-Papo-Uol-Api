@@ -3,8 +3,9 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
-import Joi from 'joi'
+import joi from 'joi'
 
+const Joi = require('joi');
 
 dotenv.config()
 const app= express()
@@ -42,7 +43,7 @@ app.get('/participants',async (req,res)=>{
     app.post('/participants', async (req,res)=>{
      
         try{
-            const nomeparticipante = await Joi.validate(req.body,participantsSchema) 
+            const nomeparticipante = await participantsSchema.validateAsync(req.body) 
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({ name:nomeparticipante,lastStatus: Date.now()})
@@ -56,7 +57,7 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
-            if (!nomeparticipante.name) return res.sendStatus(422)
+            if (nomeparticipante.name) return res.sendStatus(422)
             res.status(500).send('Deu erro !!')
         }
        
