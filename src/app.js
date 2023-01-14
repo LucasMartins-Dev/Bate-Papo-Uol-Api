@@ -11,11 +11,10 @@ const PORT = 5000
 const mongoClient = new MongoClient(process.env.DATABASE_URL)
 let db
 
-mongoClient.connect().then(()=>{
-   db = mongoClient.db('Bancoteste')
-}).catch(()=>{
-    console.log('Não foi')
-})
+await mongoClient.connect()
+
+db = mongoClient.db()
+
 
 app.get('/participants',(req,res)=>{
     try{
