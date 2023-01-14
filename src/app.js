@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
-import Joi from 'joi'
+import joi from 'joi'
 
 
 dotenv.config()
@@ -17,14 +17,14 @@ await mongoClient.connect()
 
 db = mongoClient.db()
 
-const participantsSchema = Joi.object({
-    name: Joi.string().min(1).required()
+const participantsSchema = joi.object({
+    name: joi.string().min(1).required()
 })
 
-const messagesSchema = Joi.object({
-    to: Joi.string().min(1).required(),
-    text: Joi.string().min(1).required(),
-    type: Joi.string().valid('message','private_message').required()
+const messagesSchema = joi.object({
+    to: joi.string().min(1).required(),
+    text: joi.string().min(1).required(),
+    type: joi.string().valid('message','private_message').required()
 })
 
 app.get('/participants',async (req,res)=>{
@@ -42,7 +42,8 @@ app.get('/participants',async (req,res)=>{
     app.post('/participants', async (req,res)=>{
      
         try{
-            const nomeparticipante = participantsSchema.validateAsync(req.body) 
+            const nomeparticipante = req.body 
+            const validar = userSchema.validate(nomeparticipante)
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({ name:nomeparticipante,lastStatus: Date.now()})
@@ -56,7 +57,7 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
-            if (err.isJoi) return res.sendStatus(422)
+            if (validar.err) return res.sendStatus(422)
             res.status(500).send('Deu erro !!')
         }
        
