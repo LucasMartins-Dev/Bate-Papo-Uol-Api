@@ -52,9 +52,9 @@ app.get('/participants',async (req,res)=>{
             if(nomeparticipante.error) return res.status(422).send('name not found')
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name:nomeparticipante.value.name,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({...nomeparticipante,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: nomeparticipante.value.name,
+                from: nomeparticipante.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
