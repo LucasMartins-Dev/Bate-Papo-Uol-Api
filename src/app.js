@@ -48,7 +48,7 @@ app.get('/participants',async (req,res)=>{
             const participantsSchema = joi.object({
                 name: joi.string().required()
             })
-            const nomeparticipante = await participantsSchema.validate(inforeq,{abortEarly: false})
+            const nomeparticipante = await participantsSchema.validate(inforeq)
             if(nomeparticipante.error) return res.status(422).send('name not found')
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
