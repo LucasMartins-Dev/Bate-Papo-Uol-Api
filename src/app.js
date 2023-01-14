@@ -32,16 +32,16 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-        const data = req.body
         
-        try{
+        
+        try{ 
           
-            const participant = await participantsSchema.validateAsync(data)
+            const participant = await participantsSchema.validate(req.body)
             const namexiste = await db.collection('participants').findOne(participant)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({...participant,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({name,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: participant.name,
+                from: name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
