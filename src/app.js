@@ -62,8 +62,30 @@ app.get('/participants',async (req,res)=>{
        
         
     })
-    app.get('/messages',(req,res)=>{
+    app.get('/messages', async (req,res)=>{
 
+        try{
+            const { limitemessage } = req
+            const { user } = req.headers
+
+            const mensagensgeral = await db.collection("messages").find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] }).toArray()
+            
+            if(limitemessage.limit){
+
+                const mensagenslimitadas = Number(limitemessage.limit)
+                if(isNaN(mensagenslimitadas ||mensagenslimitadas<=0)) return res.status(422)
+
+                return res.send([...mensagensgeral].slice(mensagenslimitadas).reverse())
+            }
+
+            return res.send([...mensagensgeral].reverse()) 
+
+        }catch(err){
+
+            console.log(err)
+            return res.status(500)
+
+        }
     
     })
     app.post('/messages',(req,res)=>{
