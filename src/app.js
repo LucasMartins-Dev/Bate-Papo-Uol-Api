@@ -3,15 +3,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
-import joi from 'joi'
-
-
-
-const messagesSchema = joi.object({
-    to: joi.string().required(),
-    text: joi.string().required(),
-    type: joi.string().valid('message','private_message').required()
-})
+import {participantsSchema,messagesSchema} from '../schemas/schemas.js'
 
 
 
@@ -40,31 +32,26 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-
-        const {name} = req.body
-        const participantsSchema = joi.object({
-            name: joi.string().required()
-        })
-        const nomeparticipante = await participantsSchema.validate(name)
-        if(nomeparticipante.error){return res.status(422).send('name not found')} 
-
+        const data = req.body
+        const {name} = data
 
         try{
-            
-            const namexiste = await db.collection('participants').findOne({name})
+          
+            const nomeparticipante = await participantsSchema.validate(data)
+            const namexiste = await db.collection('participants').findOne(participant)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({name,lastStatus)
+            await db.collection('participants').insertOne({name,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
                 from: name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
-                time: dayjs().format('HH:mm:ss')})
+                time: dayjs(Date.now()).format('HH:mm:ss')})
             res.status(201).send('OK')
 
         }catch(err){
             console.log(err)
-            
+            if (err.isjoi) return response.sendStatus(422);
             res.status(500).send('Deu erro !!')
         }
        
