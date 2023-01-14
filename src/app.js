@@ -42,8 +42,7 @@ app.get('/participants',async (req,res)=>{
     app.post('/participants', async (req,res)=>{
      
         try{
-            const nomeparticipante = req.body 
-            const validar = userSchema.validate(nomeparticipante)
+            const nomeparticipante = await participantsSchema.validateAsync(req.body) 
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({ name:nomeparticipante,lastStatus: Date.now()})
@@ -57,7 +56,7 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
-            if (validar.err) return res.sendStatus(422)
+            if (err.isjoi) return res.sendStatus(422)
             res.status(500).send('Deu erro !!')
         }
        
