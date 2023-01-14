@@ -46,12 +46,12 @@ app.get('/participants',async (req,res)=>{
             const participantsSchema = joi.object({
                 name: joi.string().required()
             })
-            const nomeparticipante = await participantsSchema.validate(inforeq,{abortEarly: false}) 
+            const nomeparticipante = await participantsSchema.validate(inforeq) 
             const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({name:inforeq.name,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: nomeparticipante.name,
+                from: inforeq.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
