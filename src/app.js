@@ -24,6 +24,7 @@ app.get('/participants',async (req,res)=>{
             
         }catch(err){
             console.log(err)
+            if (err.isJoi) return res.sendStatus(422)
             res.status(500).send('Algo deu errado')
         }
     }) 
@@ -41,7 +42,7 @@ app.get('/participants',async (req,res)=>{
                 text: 'entra na sala...',
                 type: 'status',
                 time: dayjs(Date.now()).format('HH:mm:ss')})
-            res.send('OK')
+            res.status(201).send('OK')
 
         }catch(err){
             console.log(err)
