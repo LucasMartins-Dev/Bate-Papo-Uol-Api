@@ -16,13 +16,19 @@ mongoClient.connect().then(()=>{
 }).catch(()=>{
     console.log('Não foi')
 })
+
 app.get('/participants',(req,res)=>{
-    const participants = db.collection("participants").find().toArray().then(dados=>{
-        return res.send(dados)
-    }).catch(()=>{
-        res.status(500)
-    })
-    })
+    try{
+        const participants = await db.collection("participants").find().toArray()
+            return res.send(participants)
+        
+            
+        }catch(err){
+            console.log(err)
+            res.status(500).send('Algo deu errado')
+        }
+    }) 
+  
     app.post('/participants', async (req,res)=>{
      
         try{
@@ -46,6 +52,7 @@ app.get('/participants',(req,res)=>{
         
     })
     app.get('/messages',(req,res)=>{
+
     
     })
     app.post('/messages',(req,res)=>{
