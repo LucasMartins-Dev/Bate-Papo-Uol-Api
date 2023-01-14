@@ -24,7 +24,6 @@ app.get('/participants',async (req,res)=>{
             
         }catch(err){
             console.log(err)
-            if (err.isJoi) return res.sendStatus(422)
             res.status(500).send('Algo deu errado')
         }
     }) 
@@ -46,6 +45,7 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
+            if (err.isJoi) return res.sendStatus(422)
             res.status(500).send('Deu erro !!')
         }
        
