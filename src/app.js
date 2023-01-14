@@ -55,11 +55,11 @@ app.get('/participants',async (req,res)=>{
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({name,lastStatus)
             await db.collection("messages").insertOne({
-                from: nomeparticipante.value.name,
+                from: name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
-                time: dayjs(Date.now()).format('HH:mm:ss')})
+                time: dayjs().format('HH:mm:ss')})
             res.status(201).send('OK')
 
         }catch(err){
