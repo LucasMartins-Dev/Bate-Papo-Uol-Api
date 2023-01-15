@@ -3,9 +3,8 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
-import joi from 'joi'
+import Joi from 'joi'
 
-const Joi = require('joi');
 
 const messagesSchema = Joi.object({
     to: Joi.string().required(),
