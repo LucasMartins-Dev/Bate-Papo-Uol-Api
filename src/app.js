@@ -73,7 +73,7 @@ app.post('/participants', async (req,res)=>{
                 return res.status(422).send(errors);
               }
             const namexiste = await db.collection('participants').findOne({nome})
-            if(!namexiste) return res.status(409).send("Usuario já cadastrado")
+            if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({ ...nome,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
                 from: nome.name,
