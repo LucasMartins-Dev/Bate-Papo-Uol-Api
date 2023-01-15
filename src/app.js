@@ -41,15 +41,16 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
+        const nome = req.body
         console.log(req.body)
         try{
-            const validation = await userschema.validate(req.body) 
+            const validation = await userschema.validate(nome) 
             
             if (validation.error) {
                 const errors = validation.error.details.map((detail) => detail.message);
                 return res.status(422).send(errors);
               }
-            const namexiste = await db.collection('participants').findOne(validation)
+            const namexiste = await db.collection('participants').findOne(nome)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({ name:validation,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
