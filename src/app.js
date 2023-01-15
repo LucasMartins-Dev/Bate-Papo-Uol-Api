@@ -39,19 +39,23 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-     
+        const name = req.body
+        const schema = Joi.object({
+            name: Joi.string().required()
+        })
+        const validar = await schema.validate(name,{abortEarly: false})
+        if(validar.error){
+            const err = validar.error.details.map((detail)=>detail.message)
+            return res.status(422).send(err) 
+        }
         try{
-            const inforeq = req.body
-            const participantsSchema = Joi.object({
-                name: Joi.string().required()
-            })
-            const nomeparticipante = await participantsSchema.validate(inforeq,{abortEarly: false})
             
-            const namexiste = await db.collection('participants').findOne(nomeparticipante)
+            
+            const namexiste = await db.collection('participants').findOne(name: name.name)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ ...nomeparticipante,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name: name.name ,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: nomeparticipante.name,
+                from: name.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
@@ -60,7 +64,7 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
-            if(err.isJoi) return res.status(422).send('name not found') 
+            
             res.status(500).send('Deu erro !!')
         }
        
