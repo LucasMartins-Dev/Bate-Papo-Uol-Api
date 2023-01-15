@@ -14,19 +14,20 @@ const mongoClient = new MongoClient(process.env.DATABASE_URL)
 let db
 
 await mongoClient.connect()
+
 db = mongoClient.db()
 
-const uschema = Joi.object({
-    name: Joi.string().required()
+const participantsSchema = Joi.object({
+    name: Joi.string().min(1).required()
 })
-const mschema = Joi.object({
-    to: Joi.string().required(),
-    text: Joi.string().required(),
+
+const messagesSchema = Joi.object({
+    to: Joi.string().min(1).required(),
+    text: Joi.string().min(1).required(),
     type: Joi.string().valid('message','private_message').required()
 })
 
 app.get('/participants',async (req,res)=>{
-
     try{
         const participants = await db.collection("participants").find().toArray()
             return res.send(participants)
@@ -39,35 +40,29 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-
-        const name  = req.body;
-	    
-       
+     
         try{
-            const Validar = userSchema.validate(name);
-        if (Validar.error) {
-            return res.sendStatus(422);
-        }
-            const namexiste = await db.collection('participants').findOne(name.name)
+            const nomeparticipante = await participantsSchema.validate(req.body) 
+            const namexiste = await db.collection('participants').findOne(nomeparticipante)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name:name.name, lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name:nomeparticipante,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: name.name,
+                from: nomeparticipante.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
-                time: dayjs(Date.now()).format('hh:mm:ss')})
+                time: dayjs(Date.now()).format('HH:mm:ss')})
             res.status(201).send('OK')
 
         }catch(err){
             console.log(err)
-            
+            if (err.isJoi) return res.sendStatus(422)
             res.status(500).send('Deu erro !!')
         }
        
         
     })
-    app.get('/messages', async (req,res)=>{
+    app.get('/messages',(req,res)=>{
 
     
     })
