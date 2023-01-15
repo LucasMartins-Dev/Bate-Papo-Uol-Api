@@ -77,13 +77,13 @@ app.post('/participants', async (req,res)=>{
     })
 app.get('/messages', async (req,res)=>{
     try {
-        const { querystring } = req
+        const { query } = req
         const { user } = req.headers
         
         const fullmessages = await db.collection("messages").find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] }).toArray()
         
-        if (querystring.limit) {
-            const messagesonscreen = Number(querystring.limit)
+        if (query.limit) {
+            const messagesonscreen = Number(query.limit)
 
             if (messagesonscreen < 1 || isNaN(messagesonscreen)) return res.sendStatus(422)
             
