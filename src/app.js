@@ -45,15 +45,15 @@ app.get('/participants',async (req,res)=>{
         })
         const validar = await schema.validate(name,{abortEarly: false})
         if(validar.error){
-            const err = validar.error.details.map((detail)=>detail.message)
-            return res.status(422).send(err) 
+            const err = validar.error.details.map((detail)=>detail.message);
+            return res.status(422).send(err) ;
         }
         try{
             
             
-            const namexiste = await db.collection('participants').findOne(name: name.name)
+            const namexiste = await db.collection('participants').findOne({name: name.name})
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name: name.name ,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name: name.name, lastStatus: Date.now()})
             await db.collection("messages").insertOne({
                 from: name.name,
                 to: 'Todos',
