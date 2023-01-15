@@ -76,7 +76,27 @@ app.post('/participants', async (req,res)=>{
         
     })
 app.get('/messages', async (req,res)=>{
-    
+    try {
+        const { querystring } = req
+        const { user } = req.headers
+        
+        const fullmessages = await db.collection("messages").find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] }).toArray()
+        
+        if (querystring.limit) {
+            const messagesonscreen = Number(querystring.limit)
+
+            if (messagesonscreen < 1 || isNaN(messagesonscreen)) return res.sendStatus(422)
+            
+            return res.send([...fullmessages].slice(-messagesonscreen).reverse())
+        }        
+
+        return res.send([...fullmessages].reverse())
+
+    } catch (err) {
+        console.log(err)
+
+        return res.sendStatus(500)
+    }
     
     })
 app.post('/messages', async (req,res)=>{
