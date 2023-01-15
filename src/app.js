@@ -5,12 +5,12 @@ import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
 import joi from 'joi'
 
+const Joi = require('joi');
 
-
-const messagesSchema = joi.object({
-    to: joi.string().required(),
-    text: joi.string().required(),
-    type: joi.string().valid('message','private_message').required()
+const messagesSchema = Joi.object({
+    to: Joi.string().required(),
+    text: Joi.string().required(),
+    type: Joi.string().valid('message','private_message').required()
 })
 
 
@@ -43,8 +43,8 @@ app.get('/participants',async (req,res)=>{
      
         try{
             const inforeq = req.body
-            const participantsSchema = joi.object({
-                name: joi.string().required()
+            const participantsSchema = Joi.object({
+                name: Joi.string().required()
             })
             const nomeparticipante = await participantsSchema.validate(inforeq,{abortEarly: false})
             
@@ -61,7 +61,7 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
-            if(err.isjoi) return res.status(422).send('name not found') 
+            if(err.isJoi) return res.status(422).send('name not found') 
             res.status(500).send('Deu erro !!')
         }
        
@@ -69,28 +69,6 @@ app.get('/participants',async (req,res)=>{
     })
     app.get('/messages', async (req,res)=>{
 
-        try{
-            const { limitemessage } = req
-            const { user } = req.headers
-
-            const mensagensgeral = await db.collection("messages").find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] }).toArray()
-            
-            if(limitemessage.limit){
-
-                const mensagenslimitadas = Number(limitemessage.limit)
-                if(isNaN(mensagenslimitadas ||mensagenslimitadas<=0)) return res.status(422)
-
-                return res.send([...mensagensgeral].slice(mensagenslimitadas).reverse())
-            }
-
-            return res.send([...mensagensgeral].reverse()) 
-
-        }catch(err){
-
-            console.log(err)
-            return res.status(500)
-
-        }
     
     })
     app.post('/messages',(req,res)=>{
