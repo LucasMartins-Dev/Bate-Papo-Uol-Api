@@ -132,6 +132,18 @@ app.post('/messages', async (req,res)=>{
     
 app.post('/status', async (req,res)=>{
         
+        try{
+            const {user} = req.headers
+            const online = await db.collection("participants").findOne({ name: user })
+            if (!online) return res.status(404).send('not found')
+            await db.collection("participants").updateOne({ name: user }, { $set: { lastStatus: Date.now() } })
+            return res.status(200).send('Online')
+        }
+        catch(erro){
+            console, log(erro)
+
+            return res.status(500).send(erro)
+        }
     })
     
 
