@@ -72,7 +72,7 @@ app.post('/participants', async (req,res)=>{
                 const errors = validation.error.details.map((detail) => detail.message);
                 return res.status(422).send(errors);
               }
-            const namexiste = await db.collection('participants').findOne({nome})
+            const namexiste = await db.collection('participants').findOne(nome.name)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
             await db.collection('participants').insertOne({ ...nome,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
