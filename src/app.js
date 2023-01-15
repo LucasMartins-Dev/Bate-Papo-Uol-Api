@@ -28,6 +28,26 @@ const messageschema = Joi.object({
     type: Joi.string().valid('message','private_message').required()
 })
 
+setInterval(async () => {
+    const valor = Date.now() - 10000
+    let remove = []
+    await db.collection("participants").find({ lastStatus: { $lt: valor } })
+        .toArray()
+        .then(dados => {
+            remove = [...dados]
+        })
+    for (const m of remove) {
+        const messageout = await db.collection("messages").insertOne({
+            from: m.name,
+            to: 'Todos',
+            text: 'sai da sala...',
+            type: 'status',
+            time: dayjs().format("HH:mm:ss")
+        })
+    }
+    await db.collection("participants").deleteMany({ lastStatus: { $lt: valor } });
+}, 15000)
+
 app.get('/participants',async (req,res)=>{
     try{
         const participants = await db.collection("participants").find().toArray()
