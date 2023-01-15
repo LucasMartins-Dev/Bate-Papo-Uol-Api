@@ -54,7 +54,7 @@ app.get('/participants',async (req,res)=>{
             return res.send(participants)
         
             
-        }catch(error){
+        }catch(erro){
             console.log(erro)
             res.status(500).send('Algo deu errado')
         }
@@ -85,11 +85,7 @@ app.post('/participants', async (req,res)=>{
 
         }catch(erro){
             console.log(erro)
-            if (validation.error) {
-                const errors = validation.error.details.map((detail) => detail.message);
-                return res.status(422).send(errors);
-              }
-              if(namexiste) return res.status(409).send("Usuario já cadastrado")
+              
             res.status(500).send('Deu erro !!')
         }
        
@@ -142,10 +138,7 @@ app.post('/messages', async (req,res)=>{
         if (messageposted) return res.sendStatus(201)
     }catch(erro){
         console.log(erro)
-        if (validation.error) {
-            const errors = validation.error.details.map((detail) => detail.message);
-            return res.status(422).send(errors)
-        }
+        
         return res.status(500).send(erro)
     } 
     })
@@ -160,7 +153,7 @@ app.post('/status', async (req,res)=>{
             return res.status(200).send('Online')
         }
         catch(erro){
-            console, log(erro)
+            console.log(erro)
 
             return res.status(500).send(erro)
         }
