@@ -69,6 +69,7 @@ app.get('/participants',async (req,res)=>{
                 const errors = validation.error.details.map((detail) => detail.message);
                 return res.status(422).send(errors);
               }
+              if(namexiste) return res.status(409).send("Usuario já cadastrado")
             res.status(500).send('Deu erro !!')
         }
        
