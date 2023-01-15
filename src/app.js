@@ -34,13 +34,13 @@ app.get('/participants',async (req,res)=>{
             return res.send(participants)
         
             
-        }catch(err){
-            console.log(err)
+        }catch(error){
+            console.log(erro)
             res.status(500).send('Algo deu errado')
         }
     }) 
   
-    app.post('/participants', async (req,res)=>{
+app.post('/participants', async (req,res)=>{
         const nome = req.body
         
         try{
@@ -63,8 +63,8 @@ app.get('/participants',async (req,res)=>{
                 time: dayjs(Date.now()).format('HH:mm:ss')})
             res.status(201).send('OK')
 
-        }catch(err){
-            console.log(err)
+        }catch(erro){
+            console.log(erro)
             if (validation.error) {
                 const errors = validation.error.details.map((detail) => detail.message);
                 return res.status(422).send(errors);
@@ -75,15 +75,33 @@ app.get('/participants',async (req,res)=>{
        
         
     })
-    app.get('/messages',(req,res)=>{
+app.get('/messages', async (req,res)=>{
+    
+    
+    })
+app.post('/messages', async (req,res)=>{
+    const message = req.body
+   
+    try{
+        const {user} = req.headers
+        const validation = await messageschema.validate(message)
+        const namexiste = await db.collection("participants").findOne({ name: user })
+        if (!namexiste) return res.sendStatus(422)
+        const messageposted = await db.collection("messages").insertOne({
+            from: user,
+            ...validation,
+            time: dayjs(Date.now()).format('HH:mm:ss')
+        })
 
-    
+        if (messageposted) return res.sendStatus(201)
+    }catch(erro){
+        console.log(erro)
+        if (err.isJoi) return res.sendStatus(422)
+        return res.status(500).send(erro)
+    } 
     })
-    app.post('/messages',(req,res)=>{
-        
-    })
     
-    app.post('/status',(req,res)=>{
+app.post('/status', async (req,res)=>{
         
     })
     
