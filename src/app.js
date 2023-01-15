@@ -105,18 +105,27 @@ app.post('/messages', async (req,res)=>{
     try{
         const {user} = req.headers
         const validation = await messageschema.validate(message)
+        if (validation.error) {
+            const errors = validation.error.details.map((detail) => detail.message);
+            return res.status(422).send(errors)
+        }
         const namexiste = await db.collection("participants").findOne({ name: user })
         if (!namexiste) return res.sendStatus(422)
-        const messageposted = await db.collection("messages").insertOne({
-            from: user,
-            ...validation,
-            time: dayjs(Date.now()).format('HH:mm:ss')
-        })
+        const messageposted = await db.collection("messages").insertOne(
+            {   from: user, 
+                to: message.to, 
+                text: message.text, 
+                type: message.type, 
+                time: dayjs().format("HH:mm:ss") 
+            })
 
         if (messageposted) return res.sendStatus(201)
     }catch(erro){
         console.log(erro)
-        if (err.isJoi) return res.sendStatus(422)
+        if (validation.error) {
+            const errors = validation.error.details.map((detail) => detail.message);
+            return res.status(422).send(errors)
+        }
         return res.status(500).send(erro)
     } 
     })
