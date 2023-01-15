@@ -5,8 +5,10 @@ import { MongoClient } from 'mongodb'
 import dayjs from 'dayjs'
 import Joi from 'joi'
 
-
-const messagesSchema = Joi.object({
+const uschema = Joi.object({
+    name: Joi.string().required()
+})
+const mschema = Joi.object({
     to: Joi.string().required(),
     text: Joi.string().required(),
     type: Joi.string().valid('message','private_message').required()
@@ -27,6 +29,7 @@ db = mongoClient.db()
 
 
 app.get('/participants',async (req,res)=>{
+
     try{
         const participants = await db.collection("participants").find().toArray()
             return res.send(participants)
@@ -42,24 +45,21 @@ app.get('/participants',async (req,res)=>{
        
        
         try{
-            const schema = Joi.object({
-                name: Joi.string().required()
-            })
-            const validar = await schema.validate(req.body)
-            if(validar.error){
-                const err = validar.error.details.map((detail)=>detail.message);
-                return res.status(422).send(err) ;
-            } 
-            
-            const namexiste = await db.collection('participants').findOne({name: req.body.name})
+           
+            const { name } = req.body;
+	    const Validar = userSchema.validate({ name });
+        if (Validar.error) {
+            return res.sendStatus(422);
+        }
+            const namexiste = await db.collection('participants').findOne({name})
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name: req.body.name, lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name, lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: req.body.name,
+                from: name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
-                time: dayjs(Date.now()).format('HH:mm:ss')})
+                time: dayjs(Date.now()).format('hh:mm:ss')})
             res.status(201).send('OK')
 
         }catch(err){
