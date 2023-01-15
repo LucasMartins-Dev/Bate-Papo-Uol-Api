@@ -9,6 +9,7 @@ import Joi from 'joi'
 dotenv.config()
 const app= express()
 app.use(cors())
+app.use(express.json());
 const PORT = 5000
 const mongoClient = new MongoClient(process.env.DATABASE_URL)
 let db
@@ -17,13 +18,13 @@ await mongoClient.connect()
 
 db = mongoClient.db()
 
-const participantsSchema = Joi.object({
-    name: Joi.string().min(1).required()
+const userschema = Joi.object({
+    name: Joi.string().required()
 })
 
-const messagesSchema = Joi.object({
-    to: Joi.string().min(1).required(),
-    text: Joi.string().min(1).required(),
+const messageschema = Joi.object({
+    to: Joi.string().required(),
+    text: Joi.string().required(),
     type: Joi.string().valid('message','private_message').required()
 })
 
@@ -40,14 +41,19 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-     
+        console.log(req.body)
         try{
-            const nomeparticipante = await participantsSchema.validate(req.body) 
-            const namexiste = await db.collection('participants').findOne(nomeparticipante)
+            const validation = await userschema.validate(req.body) 
+            
+            if (validation.error) {
+                const errors = validation.error.details.map((detail) => detail.message);
+                return res.status(422).send(errors);
+              }
+            const namexiste = await db.collection('participants').findOne(validation)
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name:nomeparticipante,lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name:validation,lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: nomeparticipante.name,
+                from: validation.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
@@ -56,7 +62,10 @@ app.get('/participants',async (req,res)=>{
 
         }catch(err){
             console.log(err)
-            if (err.isJoi) return res.sendStatus(422)
+            if (validation.error) {
+                const errors = validation.error.details.map((detail) => detail.message);
+                return res.status(422).send(errors);
+              }
             res.status(500).send('Deu erro !!')
         }
        
