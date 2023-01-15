@@ -40,16 +40,16 @@ app.get('/participants',async (req,res)=>{
   
     app.post('/participants', async (req,res)=>{
        
-        const schema = Joi.object({
-            name: Joi.string().required()
-        })
-        const validar = await schema.validate(req.body)
-        if(validar.error){
-            const err = validar.error.details.map((detail)=>detail.message);
-            return res.status(422).send(err) ;
-        }
+       
         try{
-            
+            const schema = Joi.object({
+                name: Joi.string().required()
+            })
+            const validar = await schema.validate(req.body)
+            if(validar.error){
+                const err = validar.error.details.map((detail)=>detail.message);
+                return res.status(422).send(err) ;
+            } 
             
             const namexiste = await db.collection('participants').findOne({name: req.body.name})
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
