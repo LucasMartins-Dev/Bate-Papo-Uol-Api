@@ -39,11 +39,11 @@ app.get('/participants',async (req,res)=>{
     }) 
   
     app.post('/participants', async (req,res)=>{
-        const name = req.body
+       
         const schema = Joi.object({
             name: Joi.string().required()
         })
-        const validar = await schema.validate(name,{abortEarly: false})
+        const validar = await schema.validate(req.body)
         if(validar.error){
             const err = validar.error.details.map((detail)=>detail.message);
             return res.status(422).send(err) ;
@@ -51,11 +51,11 @@ app.get('/participants',async (req,res)=>{
         try{
             
             
-            const namexiste = await db.collection('participants').findOne({name: name.name})
+            const namexiste = await db.collection('participants').findOne({name: req.body.name})
             if(namexiste) return res.status(409).send("Usuario já cadastrado")
-            await db.collection('participants').insertOne({ name: name.name, lastStatus: Date.now()})
+            await db.collection('participants').insertOne({ name: req.body.name, lastStatus: Date.now()})
             await db.collection("messages").insertOne({
-                from: name.name,
+                from: req.body.name,
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
