@@ -41,7 +41,7 @@ app.get('/participants',async (req,res)=>{
     app.post('/participants', async (req,res)=>{
 
         const name  = req.body;
-	    const Validar = userSchema.validate({ name });
+	    const Validar = userSchema.validate(name);
         if (Validar.error) {
             return res.sendStatus(422);
         }
